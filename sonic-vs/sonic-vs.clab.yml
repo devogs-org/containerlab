@@ -1,0 +1,47 @@
+name: sonic-vs
+
+mgmt:
+  network: sonic-vs-mgmt
+  ipv4-subnet: 10.16.1.0/24
+
+topology:
+  kinds:
+    sonic-vs:
+      kind: linux
+      image: docker-sonic-vs:latest
+      cpu: 1
+
+  nodes:
+    spine1:
+      kind: sonic-vs
+      mgmt-ipv4: 10.16.1.11
+      cpu-set: "0"
+
+    spine2:
+      kind: sonic-vs
+      mgmt-ipv4: 10.16.1.12
+      cpu-set: "1"
+
+    leaf1:
+      kind: sonic-vs
+      mgmt-ipv4: 10.16.1.21
+      cpu-set: "2"
+
+    leaf2:
+      kind: sonic-vs
+      mgmt-ipv4: 10.16.1.22
+      cpu-set: "3"
+
+    leaf3:
+      kind: sonic-vs
+      mgmt-ipv4: 10.16.1.23
+      cpu-set: "4"
+
+  links:
+    - endpoints: ["spine1:eth1", "leaf1:eth1"]
+    - endpoints: ["spine1:eth2", "leaf2:eth1"]
+    - endpoints: ["spine1:eth3", "leaf3:eth1"]
+
+    - endpoints: ["spine2:eth1", "leaf1:eth2"]
+    - endpoints: ["spine2:eth2", "leaf2:eth2"]
+    - endpoints: ["spine2:eth3", "leaf3:eth2"]

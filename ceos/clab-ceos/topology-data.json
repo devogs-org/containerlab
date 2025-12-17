@@ -1,0 +1,52 @@
+{
+  "name": "ceos",
+  "type": "clab",
+  "clab": {
+    "config": {
+      "prefix": "clab",
+      "mgmt": {
+        "network": "ceos-mgmt",
+        "bridge": "br-2bf5c110b144",
+        "ipv4-subnet": "10.16.3.0/24",
+        "ipv4-gw": "10.16.3.1",
+        "external-access": true
+      }
+    }
+  },
+  "ssh-pub-keys": ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGJXP+xKmn8Ze+GbQ0K2Xfs3tW0wWL+MtsDz2leZr0oK"],
+  "nodes": {
+    "spine-1": {
+      "index": "0",
+      "shortname": "spine-1",
+      "longname": "clab-ceos-spine-1",
+      "fqdn": "spine-1.ceos.io",
+      "group": "",
+      "labdir": "/home/matt/code/containerlab/ceos/clab-ceos/spine-1",
+      "kind": "arista_ceos",
+      "image": "ceos:4.35.0.1F",
+      "mgmt-net": "",
+      "mgmt-intf": "Management0",
+      "mgmt-ipv4-address": "10.16.3.11",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "",
+      "mgmt-ipv6-prefix-length": 0,
+      "mac-address": "00:1c:73:f6:9f:bc",
+      "labels": {
+        "clab-mgmt-net-bridge": "br-2bf5c110b144",
+        "clab-node-group": "",
+        "clab-node-kind": "arista_ceos",
+        "clab-node-lab-dir": "/home/matt/code/containerlab/ceos/clab-ceos/spine-1",
+        "clab-node-longname": "clab-ceos-spine-1",
+        "clab-node-name": "spine-1",
+        "clab-node-type": "",
+        "clab-owner": "matt",
+        "clab-topo-file": "/home/matt/code/containerlab/ceos/ceos.clab.yml",
+        "containerlab": "ceos"
+      },
+      "port-bindings": [
+      ]
+    }
+  },
+  "links": [
+  ]
+}

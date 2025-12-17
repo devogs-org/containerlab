@@ -1,0 +1,63 @@
+name: ceos
+
+mgmt:
+  network: ceos-mgmt
+  ipv4-subnet: 10.16.3.0/24
+
+topology:
+  kinds:
+    arista_ceos:
+      image: ceos:4.35.0.1F
+      binds:
+        - intf_mapping.json:/mnt/flash/EosIntfMapping.json:ro
+      env:
+        CLAB_MGMT_VRF: Mgmt
+
+      # Optional: Use startup-config to point to a config file named after the node
+      # startup-config: configs/__clabNodeName__.cfg
+
+  nodes:
+    # --- Spine Nodes ---
+    spine-1:
+      kind: arista_ceos
+      mgmt-ipv4: 10.16.3.11
+      cpu: 1
+      cpu-set: 0-1
+
+    spine-2:
+      kind: arista_ceos
+      mgmt-ipv4: 10.16.3.12
+      cpu: 1
+      cpu-set: 2-3
+
+    # --- Leaf Nodes ---
+    leaf-1:
+      kind: arista_ceos
+      mgmt-ipv4: 10.16.3.13
+      cpu: 1
+      cpu-set: 4-5
+
+    leaf-2:
+      kind: arista_ceos
+      mgmt-ipv4: 10.16.3.14
+      cpu: 1
+      cpu-set: 6-7
+
+    leaf-3:
+      kind: arista_ceos
+      mgmt-ipv4: 10.16.3.15
+      cpu: 1
+      cpu-set: 8-9
+
+  links:
+    # --- Leaf 1 Connections (to Spine 1 & Spine 2) ---
+    - endpoints: ["leaf-1:eth1", "spine-1:eth1"] # Leaf-1 - Spine-1
+    - endpoints: ["leaf-1:eth2", "spine-2:eth1"] # Leaf-1 - Spine-2
+
+    # --- Leaf 2 Connections (to Spine 1 & Spine 2) ---
+    - endpoints: ["leaf-2:eth1", "spine-1:eth2"] # Leaf-2 - Spine-1
+    - endpoints: ["leaf-2:eth2", "spine-2:eth2"] # Leaf-2 - Spine-2
+
+    # --- Leaf 3 Connections (to Spine 1 & Spine 2) ---
+    - endpoints: ["leaf-3:eth1", "spine-1:eth3"] # Leaf-3 - Spine-1
+    - endpoints: ["leaf-3:eth2", "spine-2:eth3"] # Leaf-3 - Spine-2

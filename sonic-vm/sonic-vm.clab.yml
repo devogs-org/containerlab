@@ -1,0 +1,41 @@
+name: sonic-vm
+
+mgmt:
+  network: sonic-vm-mgmt
+  ipv4-subnet: 10.16.1.0/24
+
+topology:
+  kinds:
+    sonic-vm:
+      kind: linux
+      image: matt13290/sonic-vs:202511
+
+  nodes:
+    spine1:
+      kind: sonic-vm
+      mgmt-ipv4: 10.16.1.11
+
+    spine2:
+      kind: sonic-vm
+      mgmt-ipv4: 10.16.1.12
+
+    leaf1:
+      kind: sonic-vm
+      mgmt-ipv4: 10.16.1.21
+
+    leaf2:
+      kind: sonic-vm
+      mgmt-ipv4: 10.16.1.22
+
+    leaf3:
+      kind: sonic-vm
+      mgmt-ipv4: 10.16.1.23
+
+  links:
+    - endpoints: ["spine1:eth1", "leaf1:eth1"]
+    - endpoints: ["spine1:eth2", "leaf2:eth1"]
+    - endpoints: ["spine1:eth3", "leaf3:eth1"]
+
+    - endpoints: ["spine2:eth1", "leaf1:eth2"]
+    - endpoints: ["spine2:eth2", "leaf2:eth2"]
+    - endpoints: ["spine2:eth3", "leaf3:eth2"]

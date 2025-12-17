@@ -1,0 +1,51 @@
+! Startup-config last modified at Tue Dec 16 12:13:54 2025 by root
+! device: leaf-1 (cEOSLab, EOS-4.35.0.1F-45130834.43501F.1 (engineering build))
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret sha512 $6$fvh6iUe0K4w0P1G8$8o08kgw9gPtpjuw0KfkZg0WoA6zLsDpMpD8WwC5VBpEzLGdCvx4NrnYIDhfXc3tOzCINVh7s.aZHkQJr1yl4b/
+!
+management api http-commands
+   no shutdown
+   !
+   vrf Mgmt
+      no shutdown
+!
+no service interface inactive port-id allocation disabled
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname leaf-1
+!
+spanning-tree mode mstp
+!
+system l1
+   unsupported speed action error
+   unsupported error-correction action error
+!
+vrf instance Mgmt
+!
+management api gnmi
+   transport grpc default
+      vrf Mgmt
+!
+management api netconf
+   transport ssh default
+      vrf Mgmt
+!
+interface Ethernet1
+!
+interface Ethernet2
+!
+interface Management0
+   vrf Mgmt
+   ip address 10.16.3.13/24
+!
+no ip routing
+no ip routing vrf Mgmt
+!
+ip route vrf Mgmt 0.0.0.0/0 10.16.3.1
+!
+end
