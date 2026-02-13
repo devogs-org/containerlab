@@ -1,0 +1,58 @@
+name: cisco-iol
+
+mgmt:
+  network: cisco-iol-mgmt
+  ipv4-subnet: 10.16.4.0/24
+
+topology:
+
+  nodes:
+    spine1:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:17.15.01
+      mgmt-ipv4: 10.16.4.11 
+
+    spine2:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:17.15.01
+      mgmt-ipv4: 10.16.4.12
+
+    leaf1:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.21
+
+    leaf2:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.22
+
+    leaf3:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.23
+
+    borderleaf1:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.24
+    
+    br-27077385af38:
+      kind: bridge
+
+  links:
+    - endpoints: ["spine1:Ethernet0/1", "leaf1:Ethernet0/1"] 
+    - endpoints: ["spine1:Ethernet0/2", "leaf2:Ethernet0/1"] 
+    - endpoints: ["spine1:Ethernet0/3", "leaf3:Ethernet0/1"]
+    - endpoints: ["spine1:Ethernet1/0", "borderleaf1:Ethernet0/1"]
+
+    - endpoints: ["spine2:Ethernet0/1", "leaf1:Ethernet0/2"] 
+    - endpoints: ["spine2:Ethernet0/2", "leaf2:Ethernet0/2"] 
+    - endpoints: ["spine2:Ethernet0/3", "leaf3:Ethernet0/2"]
+    - endpoints: ["spine2:Ethernet1/0", "borderleaf1:Ethernet0/2"]
+
+    - endpoints: ["borderleaf1:Ethernet0/3", "br-27077385af38:eth3-bl1"]

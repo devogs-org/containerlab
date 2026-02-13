@@ -12,42 +12,36 @@ topology:
       cpu: 1
       
   nodes:
-    spine1:
+    spine-1:
       kind: nokia_srlinux
       cpu-set: "0" 
       mgmt-ipv4: 10.16.2.11 
       
-    spine2:
+    spine-2:
       kind: nokia_srlinux
       cpu-set: "1" 
       mgmt-ipv4: 10.16.2.12 
 
-    leaf1:
+    leaf-1:
       kind: nokia_srlinux
       cpu-set: "2"
       mgmt-ipv4: 10.16.2.21
 
-    leaf2:
+    leaf-2:
       kind: nokia_srlinux
       cpu-set: "3"
       mgmt-ipv4: 10.16.2.22
 
-    leaf3:
+    leaf-3:
       kind: nokia_srlinux
       cpu-set: "4"
       mgmt-ipv4: 10.16.2.23
 
   links:
-    - endpoints: ["spine1:ethernet-1/1/1", "leaf1:ethernet-1/1/1"] 
-    # spine1 (Port 2) <-> leaf2 (Port 1)
-    - endpoints: ["spine1:ethernet-1/1/2", "leaf2:ethernet-1/1/1"] 
-    # spine1 (Port 3) <-> leaf3 (Port 1)
-    - endpoints: ["spine1:ethernet-1/1/3", "leaf3:ethernet-1/1/1"] 
+    - endpoints: ["spine-1:ethernet-1/1", "leaf-1:ethernet-1/1"] 
+    - endpoints: ["spine-1:ethernet-1/2", "leaf-2:ethernet-1/1"] 
+    - endpoints: ["spine-1:ethernet-1/3", "leaf-3:ethernet-1/1"] 
 
-    # --- Spine 2 Links (FIXED: using ethernet-1/1/X format) ---
-    # spine2 (Port 1) <-> leaf1 (Port 2)
-    - endpoints: ["spine2:ethernet-1/1/1", "leaf1:ethernet-1/1/2"] 
-    # spine2 (Port 2) <-> leaf2 (Port 2)
-    - endpoints: ["spine2:ethernet-1/1/2", "leaf2:ethernet-1/1/2"] 
-    # spine2 (Port 3) <-> leaf3 (Port 2)
-    - endpoints: ["spine2:ethernet-1/1/3", "leaf3:ethernet-1/1/2"]
+    - endpoints: ["spine-2:ethernet-1/1", "leaf-1:ethernet-1/2"] 
+    - endpoints: ["spine-2:ethernet-1/2", "leaf-2:ethernet-1/2"] 
+    - endpoints: ["spine-2:ethernet-1/3", "leaf-3:ethernet-1/2"]
