@@ -8,40 +8,56 @@ topology:
   kinds:
     nokia_srlinux:
       image: ghcr.io/nokia/srlinux:latest
-      type: ixr-d1 
+      type: ixr-d1
       cpu: 1
-      
-  nodes:
-    spine-1:
-      kind: nokia_srlinux
-      cpu-set: "0" 
-      mgmt-ipv4: 10.16.2.11 
-      
-    spine-2:
-      kind: nokia_srlinux
-      cpu-set: "1" 
-      mgmt-ipv4: 10.16.2.12 
 
-    leaf-1:
+  nodes:
+    # 2 Border Leaf Switches (Uplinks to VyOS HA)
+    BorderLeaf-1:
+      kind: nokia_srlinux
+      cpu-set: "0"
+      mgmt-ipv4: 10.16.2.31
+
+    BorderLeaf-2:
+      kind: nokia_srlinux
+      cpu-set: "1"
+      mgmt-ipv4: 10.16.2.32
+
+    # 2 Spine Switches
+    Spine-1:
       kind: nokia_srlinux
       cpu-set: "2"
-      mgmt-ipv4: 10.16.2.21
+      mgmt-ipv4: 10.16.2.11
 
-    leaf-2:
+    Spine-2:
       kind: nokia_srlinux
       cpu-set: "3"
-      mgmt-ipv4: 10.16.2.22
+      mgmt-ipv4: 10.16.2.12
 
-    leaf-3:
+    # 2 Leaf Switches
+    Leaf-1:
       kind: nokia_srlinux
       cpu-set: "4"
-      mgmt-ipv4: 10.16.2.23
+      mgmt-ipv4: 10.16.2.21
+
+    Leaf-2:
+      kind: nokia_srlinux
+      cpu-set: "5"
+      mgmt-ipv4: 10.16.2.22
 
   links:
-    - endpoints: ["spine-1:ethernet-1/1", "leaf-1:ethernet-1/1"] 
-    - endpoints: ["spine-1:ethernet-1/2", "leaf-2:ethernet-1/1"] 
-    - endpoints: ["spine-1:ethernet-1/3", "leaf-3:ethernet-1/1"] 
+    # Border Leaf Uplinks to VyOS HA via Transit Bridge
+    - endpoints: ["BorderLeaf-1:ethernet-1/10", "host:br-srlinux-wan:eth1"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/10", "host:br-srlinux-wan:eth2"]
 
-    - endpoints: ["spine-2:ethernet-1/1", "leaf-1:ethernet-1/2"] 
-    - endpoints: ["spine-2:ethernet-1/2", "leaf-2:ethernet-1/2"] 
-    - endpoints: ["spine-2:ethernet-1/3", "leaf-3:ethernet-1/2"]
+    # Border Leaf to Spine Mesh
+    - endpoints: ["BorderLeaf-1:ethernet-1/1", "Spine-1:ethernet-1/1"]
+    - endpoints: ["BorderLeaf-1:ethernet-1/2", "Spine-2:ethernet-1/1"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/1", "Spine-1:ethernet-1/2"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/2", "Spine-2:ethernet-1/2"]
+
+    # Spine to Leaf Mesh
+    - endpoints: ["Spine-1:ethernet-1/3", "Leaf-1:ethernet-1/1"]
+    - endpoints: ["Spine-1:ethernet-1/4", "Leaf-2:ethernet-1/1"]
+    - endpoints: ["Spine-2:ethernet-1/3", "Leaf-1:ethernet-1/2"]
+    - endpoints: ["Spine-2:ethernet-1/4", "Leaf-2:ethernet-1/2"]
