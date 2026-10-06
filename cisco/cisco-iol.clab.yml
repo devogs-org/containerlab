@@ -5,54 +5,120 @@ mgmt:
   ipv4-subnet: 10.16.4.0/24
 
 topology:
-
   nodes:
-    spine1:
+    # 2 Core Switches
+    core1:
       kind: cisco_iol
       image: matt13290/cisco_iol:17.15.01
-      mgmt-ipv4: 10.16.4.11 
-
-    spine2:
+      mgmt-ipv4: 10.16.4.11
+    core2:
       kind: cisco_iol
       image: matt13290/cisco_iol:17.15.01
       mgmt-ipv4: 10.16.4.12
 
-    leaf1:
+    # 4 Distribution Switches
+    dist1-1:
       kind: cisco_iol
       image: matt13290/cisco_iol:l2-17.15.01
       type: l2
       mgmt-ipv4: 10.16.4.21
-
-    leaf2:
+    dist1-2:
       kind: cisco_iol
       image: matt13290/cisco_iol:l2-17.15.01
       type: l2
       mgmt-ipv4: 10.16.4.22
 
-    leaf3:
+    dist2-1:
       kind: cisco_iol
       image: matt13290/cisco_iol:l2-17.15.01
       type: l2
       mgmt-ipv4: 10.16.4.23
-
-    borderleaf1:
+    dist2-2:
       kind: cisco_iol
       image: matt13290/cisco_iol:l2-17.15.01
       type: l2
       mgmt-ipv4: 10.16.4.24
-    
-    br-27077385af38:
-      kind: bridge
+
+    # 4 Access Switches
+    access1-1:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.31
+    access1-2:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.32
+
+    access2-1:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.33
+    access2-2:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.4.34
+
+    # Dataplane Testing Hosts (Alpine Linux)
+    host1:
+      kind: linux
+      image: alpine:latest
+      mgmt-ipv4: 10.16.4.41
+    host2:
+      kind: linux
+      image: alpine:latest
+      mgmt-ipv4: 10.16.4.42
+    host3:
+      kind: linux
+      image: alpine:latest
+      mgmt-ipv4: 10.16.4.43
+    host4:
+      kind: linux
+      image: alpine:latest
+      mgmt-ipv4: 10.16.4.44
 
   links:
-    - endpoints: ["spine1:Ethernet0/1", "leaf1:Ethernet0/1"] 
-    - endpoints: ["spine1:Ethernet0/2", "leaf2:Ethernet0/1"] 
-    - endpoints: ["spine1:Ethernet0/3", "leaf3:Ethernet0/1"]
-    - endpoints: ["spine1:Ethernet1/0", "borderleaf1:Ethernet0/1"]
+    # Uplinks to VyOS HA via Transit Bridge
+    - endpoints: ["core1:Ethernet0/1", "host:br-cisco-wan:eth1"]
+    - endpoints: ["core2:Ethernet0/1", "host:br-cisco-wan:eth2"]
 
-    - endpoints: ["spine2:Ethernet0/1", "leaf1:Ethernet0/2"] 
-    - endpoints: ["spine2:Ethernet0/2", "leaf2:Ethernet0/2"] 
-    - endpoints: ["spine2:Ethernet0/3", "leaf3:Ethernet0/2"]
-    - endpoints: ["spine2:Ethernet1/0", "borderleaf1:Ethernet0/2"]
+    # Core to Distribution Block 1
+    - endpoints: ["core1:Ethernet0/2", "dist1-1:Ethernet0/1"]
+    - endpoints: ["core1:Ethernet0/3", "dist1-2:Ethernet0/1"]
+    - endpoints: ["core2:Ethernet0/2", "dist1-1:Ethernet0/2"]
+    - endpoints: ["core2:Ethernet0/3", "dist1-2:Ethernet0/2"]
 
-    - endpoints: ["borderleaf1:Ethernet0/3", "br-27077385af38:eth3-bl1"]
+    # Core to Distribution Block 2
+    - endpoints: ["core1:Ethernet1/0", "dist2-1:Ethernet0/1"]
+    - endpoints: ["core1:Ethernet1/1", "dist2-2:Ethernet0/1"]
+    - endpoints: ["core2:Ethernet1/0", "dist2-1:Ethernet0/2"]
+    - endpoints: ["core2:Ethernet1/1", "dist2-2:Ethernet0/2"]
+
+    # Distribution 1 LACP Interconnect
+    - endpoints: ["dist1-1:Ethernet1/2", "dist1-2:Ethernet1/2"]
+    - endpoints: ["dist1-1:Ethernet1/3", "dist1-2:Ethernet1/3"]
+
+    # Distribution 2 LACP Interconnect
+    - endpoints: ["dist2-1:Ethernet1/2", "dist2-2:Ethernet1/2"]
+    - endpoints: ["dist2-1:Ethernet1/3", "dist2-2:Ethernet1/3"]
+
+    # Distribution Block 1 to Access Block 1
+    - endpoints: ["dist1-1:Ethernet1/0", "access1-1:Ethernet0/1"]
+    - endpoints: ["dist1-2:Ethernet1/0", "access1-1:Ethernet0/2"]
+    - endpoints: ["dist1-1:Ethernet1/1", "access1-2:Ethernet0/1"]
+    - endpoints: ["dist1-2:Ethernet1/1", "access1-2:Ethernet0/2"]
+
+    # Distribution Block 2 to Access Block 2
+    - endpoints: ["dist2-1:Ethernet1/0", "access2-1:Ethernet0/1"]
+    - endpoints: ["dist2-2:Ethernet1/0", "access2-1:Ethernet0/2"]
+    - endpoints: ["dist2-1:Ethernet1/1", "access2-2:Ethernet0/1"]
+    - endpoints: ["dist2-2:Ethernet1/1", "access2-2:Ethernet0/2"]
+
+    # Access to Hosts
+    - endpoints: ["access1-1:Ethernet0/3", "host1:eth1"]
+    - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
+    - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
+    - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
