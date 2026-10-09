@@ -80,10 +80,14 @@ topology:
       image: alpine:latest
       mgmt-ipv4: 10.16.4.44
 
+    # Host bridge, created by netplan (clab only attaches to it)
+    br-cisco-wan:
+      kind: bridge
+
   links:
     # Uplinks to VyOS HA via Transit Bridge
-    - endpoints: ["core1:Ethernet0/1", "host:br-cisco-wan:eth1"]
-    - endpoints: ["core2:Ethernet0/1", "host:br-cisco-wan:eth2"]
+    - endpoints: ["core1:Ethernet0/1", "br-cisco-wan:cw-core1"]
+    - endpoints: ["core2:Ethernet0/1", "br-cisco-wan:cw-core2"]
 
     # Core to Distribution Block 1
     - endpoints: ["core1:Ethernet0/2", "dist1-1:Ethernet0/1"]
@@ -122,3 +126,4 @@ topology:
     - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
     - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
     - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
+

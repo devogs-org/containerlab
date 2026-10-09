@@ -45,10 +45,14 @@ topology:
       cpu-set: "5"
       mgmt-ipv4: 10.16.2.22
 
+    # Host bridge, created by netplan (clab only attaches to it)
+    br-srlinux-wan:
+      kind: bridge
+
   links:
     # Border Leaf Uplinks to VyOS HA via Transit Bridge
-    - endpoints: ["BorderLeaf-1:ethernet-1/10", "host:br-srlinux-wan:eth1"]
-    - endpoints: ["BorderLeaf-2:ethernet-1/10", "host:br-srlinux-wan:eth2"]
+    - endpoints: ["BorderLeaf-1:ethernet-1/10", "br-srlinux-wan:sw-bl1"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/10", "br-srlinux-wan:sw-bl2"]
 
     # Border Leaf to Spine Mesh
     - endpoints: ["BorderLeaf-1:ethernet-1/1", "Spine-1:ethernet-1/1"]

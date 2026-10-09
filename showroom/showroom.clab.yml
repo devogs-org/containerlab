@@ -1,0 +1,188 @@
+name: showroom
+
+mgmt:
+  network: clab-mgmt
+  ipv4-subnet: 10.16.10.0/24
+
+topology:
+  groups:
+    vyatta:
+      kind: vyosnetworks_vyos
+      image: matt13290/vyos:2026.03-generic-amd64
+    nokia:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:latest
+      type: ixr-d1
+      cpu: 1
+    cisco:
+      kind: cisco_iol
+      image: matt13290/cisco_iol:17.15.01
+    hosts:
+      kind: linux
+      image: alpine:latest
+      network-mode: none
+      exec:
+        - udhcpc -i eth1 -b -q
+
+  nodes:
+    # ---------------- VyOS firewalls (10.16.10.11-19) ----------------
+    FW1:
+      group: vyatta
+      mgmt-ipv4: 10.16.10.11
+    FW2:
+      group: vyatta
+      mgmt-ipv4: 10.16.10.12
+
+    # Host bridge, created by netplan (clab only attaches to it)
+    br-wan:
+      kind: bridge
+
+    # ---------------- SR Linux (10.16.10.21-29) ----------------
+    BorderLeaf-1:
+      group: nokia
+      cpu-set: "0"
+      mgmt-ipv4: 10.16.10.21
+    BorderLeaf-2:
+      group: nokia
+      cpu-set: "1"
+      mgmt-ipv4: 10.16.10.22
+    Spine-1:
+      group: nokia
+      cpu-set: "2"
+      mgmt-ipv4: 10.16.10.23
+    Spine-2:
+      group: nokia
+      cpu-set: "3"
+      mgmt-ipv4: 10.16.10.24
+    Leaf-1:
+      group: nokia
+      cpu-set: "4"
+      mgmt-ipv4: 10.16.10.25
+    Leaf-2:
+      group: nokia
+      cpu-set: "5"
+      mgmt-ipv4: 10.16.10.26
+
+    # ---------------- Cisco IOL (10.16.10.31-49) ----------------
+    core1:
+      group: cisco
+      mgmt-ipv4: 10.16.10.31
+    core2:
+      group: cisco
+      mgmt-ipv4: 10.16.10.32
+
+    dist1-1:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.33
+    dist1-2:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.34
+    dist2-1:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.35
+    dist2-2:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.36
+
+    access1-1:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.37
+    access1-2:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.38
+    access2-1:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.39
+    access2-2:
+      group: cisco
+      image: matt13290/cisco_iol:l2-17.15.01
+      type: l2
+      mgmt-ipv4: 10.16.10.40
+
+    # Dataplane testing hosts (Alpine Linux): no mgmt interface, eth1 via DHCP
+    host1:
+      group: hosts
+    host2:
+      group: hosts
+    host3:
+      group: hosts
+    host4:
+      group: hosts
+
+  links:
+    # --- External WAN ---
+    - endpoints: ["FW1:eth1", "br-wan:wan-fw1"]
+    - endpoints: ["FW2:eth1", "br-wan:wan-fw2"]
+
+    # --- FW1 interconnects ---
+    - endpoints: ["FW1:eth2", "core1:Ethernet0/1"]
+    - endpoints: ["FW1:eth3", "core2:Ethernet0/1"]
+    - endpoints: ["FW1:eth4", "BorderLeaf-1:ethernet-1/10"]
+    - endpoints: ["FW1:eth5", "BorderLeaf-2:ethernet-1/10"]
+
+    # --- FW2 interconnects ---
+    - endpoints: ["FW2:eth2", "core1:Ethernet0/2"]
+    - endpoints: ["FW2:eth3", "core2:Ethernet0/2"]
+    - endpoints: ["FW2:eth4", "BorderLeaf-1:ethernet-1/20"]
+    - endpoints: ["FW2:eth5", "BorderLeaf-2:ethernet-1/20"]
+
+    # --- FW HA interconnect ---
+    - endpoints: ["FW1:eth6", "FW2:eth6"]
+
+    # --- SR Linux: border leaf to spine ---
+    - endpoints: ["BorderLeaf-1:ethernet-1/1", "Spine-1:ethernet-1/1"]
+    - endpoints: ["BorderLeaf-1:ethernet-1/2", "Spine-2:ethernet-1/1"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/1", "Spine-1:ethernet-1/2"]
+    - endpoints: ["BorderLeaf-2:ethernet-1/2", "Spine-2:ethernet-1/2"]
+
+    # --- SR Linux: spine to leaf ---
+    - endpoints: ["Spine-1:ethernet-1/3", "Leaf-1:ethernet-1/1"]
+    - endpoints: ["Spine-1:ethernet-1/4", "Leaf-2:ethernet-1/1"]
+    - endpoints: ["Spine-2:ethernet-1/3", "Leaf-1:ethernet-1/2"]
+    - endpoints: ["Spine-2:ethernet-1/4", "Leaf-2:ethernet-1/2"]
+
+    # --- Cisco: core to distribution (shifted to free Ethernet0/1-0/2 for FW uplinks) ---
+    - endpoints: ["core1:Ethernet0/3", "dist1-1:Ethernet0/1"]
+    - endpoints: ["core1:Ethernet1/0", "dist1-2:Ethernet0/1"]
+    - endpoints: ["core2:Ethernet0/3", "dist1-1:Ethernet0/2"]
+    - endpoints: ["core2:Ethernet1/0", "dist1-2:Ethernet0/2"]
+    - endpoints: ["core1:Ethernet1/1", "dist2-1:Ethernet0/1"]
+    - endpoints: ["core1:Ethernet1/2", "dist2-2:Ethernet0/1"]
+    - endpoints: ["core2:Ethernet1/1", "dist2-1:Ethernet0/2"]
+    - endpoints: ["core2:Ethernet1/2", "dist2-2:Ethernet0/2"]
+
+    # --- Cisco: distribution LACP interconnects ---
+    - endpoints: ["dist1-1:Ethernet1/2", "dist1-2:Ethernet1/2"]
+    - endpoints: ["dist1-1:Ethernet1/3", "dist1-2:Ethernet1/3"]
+    - endpoints: ["dist2-1:Ethernet1/2", "dist2-2:Ethernet1/2"]
+    - endpoints: ["dist2-1:Ethernet1/3", "dist2-2:Ethernet1/3"]
+
+    # --- Cisco: distribution to access ---
+    - endpoints: ["dist1-1:Ethernet1/0", "access1-1:Ethernet0/1"]
+    - endpoints: ["dist1-2:Ethernet1/0", "access1-1:Ethernet0/2"]
+    - endpoints: ["dist1-1:Ethernet1/1", "access1-2:Ethernet0/1"]
+    - endpoints: ["dist1-2:Ethernet1/1", "access1-2:Ethernet0/2"]
+    - endpoints: ["dist2-1:Ethernet1/0", "access2-1:Ethernet0/1"]
+    - endpoints: ["dist2-2:Ethernet1/0", "access2-1:Ethernet0/2"]
+    - endpoints: ["dist2-1:Ethernet1/1", "access2-2:Ethernet0/1"]
+    - endpoints: ["dist2-2:Ethernet1/1", "access2-2:Ethernet0/2"]
+
+    # --- Cisco: access to hosts ---
+    - endpoints: ["access1-1:Ethernet0/3", "host1:eth1"]
+    - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
+    - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
+    - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]

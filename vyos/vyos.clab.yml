@@ -1,0 +1,43 @@
+name: vyos
+
+mgmt:
+  network: vyos-mgmt
+  ipv4-subnet: 10.16.7.0/24
+  ipv6-subnet: fd00:10:16:7::/64
+
+topology:
+  kinds:
+    vyosnetworks_vyos:
+      image: matt13290/vyos:2026.03-generic-amd64
+
+  nodes:
+    FW1:
+      kind: vyosnetworks_vyos
+      mgmt-ipv4: 10.16.7.11
+    FW2:
+      kind: vyosnetworks_vyos
+      mgmt-ipv4: 10.16.7.12
+
+    br-wan:
+      kind: bridge
+    br-cisco-wan:
+      kind: bridge
+    br-srlinux-wan:
+      kind: bridge
+
+  links:
+    # Internet WAN
+    - endpoints: ["FW1:eth1", "br-wan:wan-fw1"]
+    - endpoints: ["FW2:eth1", "br-wan:wan-fw2"]
+
+    # Cisco IOL transit
+    - endpoints: ["FW1:eth2", "br-cisco-wan:cw-fw1"]
+    - endpoints: ["FW2:eth2", "br-cisco-wan:cw-fw2"]
+
+    # SR-Linux transit
+    - endpoints: ["FW1:eth3", "br-srlinux-wan:sw-fw1"]
+    - endpoints: ["FW2:eth3", "br-srlinux-wan:sw-fw2"]
+
+    # HA sync / keepalive (direct)
+    - endpoints: ["FW1:eth4", "FW2:eth4"]
+    - endpoints: ["FW1:eth5", "FW2:eth5"]
