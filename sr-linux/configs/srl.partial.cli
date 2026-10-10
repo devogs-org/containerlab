@@ -1,0 +1,3 @@
+delete / system grpc-server eda-mgmt
+delete / system grpc-server eda-insecure-mgmt
+delete / system grpc-server eda-discovery

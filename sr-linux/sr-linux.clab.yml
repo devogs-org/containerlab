@@ -9,6 +9,7 @@ topology:
     nokia_srlinux:
       image: ghcr.io/nokia/srlinux:latest
       type: ixr-d1
+      startup-config: configs/srl.partial.cli
       cpu: 1
 
   nodes:

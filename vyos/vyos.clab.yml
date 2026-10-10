@@ -9,6 +9,10 @@ topology:
   kinds:
     vyosnetworks_vyos:
       image: matt13290/vyos:2026.03-generic-amd64
+      binds:
+        # Privileged containers share the host kernel ring buffer: hide /dev/kmsg
+        # so journald/rsyslog don't forward host kernel logs (UFW, AppArmor...)
+        - /dev/null:/dev/kmsg
 
   nodes:
     FW1:
