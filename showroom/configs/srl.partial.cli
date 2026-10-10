@@ -1,0 +1,32 @@
+delete / system grpc-server eda-mgmt
+delete / system grpc-server eda-insecure-mgmt
+delete / system grpc-server eda-discovery
+
+# Syslog to the showroom collector.
+# - Forward every facility EXCEPT kern, at every severity (match-above debug): kern is
+#   the shared host kernel ring buffer (host UFW/AppArmor), never a device log.
+# - Filter no-license drops the "No valid license" noise of the unlicensed image.
+#   composition-operator "and" makes it narrow the facilities (default "or" would widen
+#   them and leak kern).
+set / system logging filter no-license not-regex "[Ll]icense"
+set / system logging filter no-license composition-operator and
+set / system logging remote-server 10.16.10.100 transport udp remote-port 514 network-instance mgmt
+set / system logging remote-server 10.16.10.100 filter [ no-license ]
+set / system logging remote-server 10.16.10.100 facility auth priority match-above debug
+set / system logging remote-server 10.16.10.100 facility cron priority match-above debug
+set / system logging remote-server 10.16.10.100 facility daemon priority match-above debug
+set / system logging remote-server 10.16.10.100 facility ftp priority match-above debug
+set / system logging remote-server 10.16.10.100 facility lpr priority match-above debug
+set / system logging remote-server 10.16.10.100 facility mail priority match-above debug
+set / system logging remote-server 10.16.10.100 facility news priority match-above debug
+set / system logging remote-server 10.16.10.100 facility syslog priority match-above debug
+set / system logging remote-server 10.16.10.100 facility user priority match-above debug
+set / system logging remote-server 10.16.10.100 facility uucp priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local0 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local1 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local2 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local3 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local4 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local5 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local6 priority match-above debug
+set / system logging remote-server 10.16.10.100 facility local7 priority match-above debug
