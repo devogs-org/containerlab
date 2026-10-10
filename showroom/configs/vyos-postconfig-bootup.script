@@ -1,0 +1,15 @@
+#!/bin/vbash
+# Runs after the VyOS config is loaded (every boot). Idempotent.
+# Enforces settings that must hold on every firewall even if the node config dir is recreated.
+if [ "$(id -g -n)" != 'vyattacfg' ]; then
+    exec sg vyattacfg -c "/bin/vbash $(readlink -f "$0") $*"
+fi
+source /opt/vyatta/etc/functions/script-template
+configure
+
+# No rsyslog "-- MARK --" heartbeat lines in the collector
+set system syslog marker disable
+
+commit
+save
+exit
