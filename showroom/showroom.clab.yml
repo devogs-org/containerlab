@@ -24,6 +24,11 @@ topology:
     cisco:
       kind: cisco_iol
       image: matt13290/cisco_iol:17.15.01
+      binds:
+        # Persistent per-node "flash": the IOL unix: filesystem is /iol, so this shows up as
+        # unix:/flash/. Used for native snapshots (copy running-config unix:/flash/<name>.cfg)
+        # and rollback (configure replace unix:/flash/<name>.cfg force).
+        - __clabNodeDir__/flash:/iol/flash
     hosts:
       kind: linux
       image: alpine:latest
