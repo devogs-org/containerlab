@@ -28,7 +28,9 @@ topology:
         # Persistent per-node "flash": the IOL unix: filesystem is /iol, so this shows up as
         # unix:/flash/. Used for native snapshots (copy running-config unix:/flash/<name>.cfg)
         # and rollback (configure replace unix:/flash/<name>.cfg force).
-        - __clabNodeDir__/flash:/iol/flash
+        # Kept outside clab-showroom/ so --reconfigure does not wipe it. Containerlab requires the
+        # folders to exist: mkdir -p showroom/flash/<node> (see README).
+        - flash/__clabNodeName__:/iol/flash
     hosts:
       kind: linux
       image: alpine:latest
