@@ -18,6 +18,8 @@ topology:
         - /dev/null:/dev/kmsg
         # Boot hook enforcing syslog settings (config.boot is per-node, so no shared startup-config)
         - configs/vyos-postconfig-bootup.script:/config/scripts/vyos-postconfig-bootup.script:ro
+        # Logs are streamed to the collector, not kept: volatile, small and rate limited journal (see the file)
+        - configs/vyos-journald.conf:/etc/systemd/journald.conf.d/10-stream-only.conf:ro
       # CPU budget of the network nodes: a DHCP/broadcast storm took each firewall to ~250% CPU (Kea, journald,
       # rsyslog) and the whole host to ~80%. 1.5 CPU is plenty at idle (~0.3%).
       cpu: 1.5
