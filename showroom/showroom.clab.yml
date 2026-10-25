@@ -5,6 +5,9 @@ mgmt:
   ipv4-subnet: 10.16.10.0/24
 
 topology:
+  # CPU layout of the 16-CPU host: 0-5 one core per SR Linux node (cpu-set per node below), 6-11 shared by the
+  # VyOS, IOL and host containers (the cpu caps of their groups), 12-15 left to the other services of the host
+  # (NetBox, LibreNMS, OpenObserve, Semaphore).
   groups:
     vyatta:
       kind: vyosnetworks_vyos
@@ -15,6 +18,10 @@ topology:
         - /dev/null:/dev/kmsg
         # Boot hook enforcing syslog settings (config.boot is per-node, so no shared startup-config)
         - configs/vyos-postconfig-bootup.script:/config/scripts/vyos-postconfig-bootup.script:ro
+      # CPU budget of the network nodes: a DHCP/broadcast storm took each firewall to ~250% CPU (Kea, journald,
+      # rsyslog) and the whole host to ~80%. 1.5 CPU is plenty at idle (~0.3%).
+      cpu: 1.5
+      cpu-set: "6-11"
     nokia:
       kind: nokia_srlinux
       image: ghcr.io/nokia/srlinux:latest
@@ -31,10 +38,16 @@ topology:
         # Kept outside clab-showroom/ so --reconfigure does not wipe it. Containerlab requires the
         # folders to exist: mkdir -p showroom/flash/<node> (see README).
         - flash/__clabNodeName__:/iol/flash
+      # IOL is mostly single-threaded and idles at ~1% CPU. The cap keeps a storm from taking the host
+      # (the L2 images cannot police or storm-control, so the container is the only limit).
+      cpu: 0.5
+      cpu-set: "6-11"
     hosts:
       kind: linux
       image: alpine:latest
       network-mode: none
+      cpu: 0.25
+      cpu-set: "6-11"
       exec:
         - udhcpc -i eth1 -b -q
 
