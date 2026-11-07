@@ -24,12 +24,16 @@ topology:
       # rsyslog) and the whole host to ~80%. 1.5 CPU is plenty at idle (~0.3%).
       cpu: 1.5
       cpu-set: "6-11"
+      # Memory cap (host protection only): ~450-700 MiB used, so 2gb is ~3x headroom.
+      memory: 2gb
     nokia:
       kind: nokia_srlinux
       image: ghcr.io/nokia/srlinux:latest
       type: ixr-d1
       startup-config: configs/srl.partial.cli
       cpu: 1
+      # Memory cap (host protection only): ~1.7 GiB used per node (peak 1.8), so 4gb is >2x headroom.
+      memory: 4gb
     cisco:
       kind: cisco_iol
       image: matt13290/cisco_iol:17.15.01
@@ -44,12 +48,16 @@ topology:
       # (the L2 images cannot police or storm-control, so the container is the only limit).
       cpu: 0.5
       cpu-set: "6-11"
+      # Memory cap (host protection only): ~165-185 MiB used, so 768mb is ~4x headroom.
+      memory: 768mb
     hosts:
       kind: linux
       image: alpine:latest
       network-mode: none
       cpu: 0.25
       cpu-set: "6-11"
+      # Memory cap (host protection only): ~1-6 MiB used.
+      memory: 64mb
       exec:
         - udhcpc -i eth1 -b -q
 
