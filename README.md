@@ -16,8 +16,8 @@ reject `storm-control` and MQC `service-policy`, so the container is the only pl
 
 | CPUs | Used by | Cap |
 |---|---|---|
-| 0-5 | SR Linux, one core per node (`cpu-set` per node) | `cpu: 1` each |
-| 6-11 | VyOS, Cisco IOL and the Alpine hosts (`cpu-set: "6-11"` in their groups) | VyOS `cpu: 1.5`, IOL `cpu: 0.5`, hosts `cpu: 0.25` each |
+| 0-5 | SR Linux, one core per node (`cpu-set` per node) | `cpu: 1`, `memory: 4gb` each |
+| 6-11 | VyOS, Cisco IOL and the Alpine hosts (`cpu-set: "6-11"` in their groups) | VyOS `cpu: 1.5`, IOL `cpu: 0.5`, hosts `cpu: 0.25` each; memory caps: VyOS `2gb`, IOL `768mb`, hosts `64mb` |
 | 12-15 | the other services of the host (NetBox, LibreNMS, OpenObserve, Semaphore) | none |
 
 At idle each IOL node uses about 1% and each firewall 0.3%. The limits apply at deploy time: redeploy to change them
