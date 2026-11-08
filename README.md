@@ -29,4 +29,4 @@ Check with `docker inspect clab-showroom-core1 --format '{{.HostConfig.CpuQuota}
 The firewalls send their syslog to the collector and keep nothing (twelve-factor logs). `showroom/configs/vyos-journald.conf`
 is mounted as a journald drop-in: volatile journal (RAM), 32M maximum, 500 messages per 30 s and service. Without it the
 persistent journal grew to 3.9 GB in a DHCP storm (Kea logs every packet). The local syslog sink is removed by Ansible
-(`day1_foundation`, tag `syslog`). Check: `docker exec clab-showroom-FW1 systemd-analyze cat-config systemd/journald.conf`.
+(`day1_campus`, tag `syslog`). Check: `docker exec clab-showroom-FW1 systemd-analyze cat-config systemd/journald.conf`.
