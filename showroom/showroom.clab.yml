@@ -77,6 +77,8 @@ topology:
     # ---------------- SR Linux (10.16.10.21-29) ----------------
     BorderLeaf-1:
       group: nokia
+      # IXR-D2L: the IXR-D1 chassis has no VXLAN/EVPN data model (no tunnel-interface, bgp-evpn, bgp-vpn).
+      type: ixr-d2l
       cpu-set: "0"
       mgmt-ipv4: 10.16.10.21
     BorderLeaf-2:
