@@ -1,0 +1,12 @@
+#!/bin/sh
+# udhcpc script of the campus hosts: the default script, then the DNS options of the lease written in place.
+# Docker bind-mounts /etc/resolv.conf, so the default script cannot replace it ("mv: Resource busy").
+/usr/share/udhcpc/default.script "$@"
+case "$1" in
+  bound|renew)
+    {
+      [ -n "$domain" ] && echo "search $domain"
+      for server in $dns; do echo "nameserver $server"; done
+    } > /etc/resolv.conf
+    ;;
+esac
