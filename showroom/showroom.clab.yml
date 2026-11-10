@@ -63,8 +63,8 @@ topology:
       exec:
         # The lease (Kea on the firewalls) carries the DNS servers and the domain: the script writes them in /etc/resolv.conf.
         - udhcpc -i eth1 -b -q -s /usr/local/bin/udhcpc-dns.script
-    # Data-center hosts: same limits, but a static address (set per node, from NetBox) instead of DHCP.
-    dc-hosts:
+    # Data-center servers: same limits, but a static address (set per node, from NetBox) instead of DHCP.
+    servers:
       kind: linux
       image: alpine:latest
       network-mode: none
@@ -179,32 +179,32 @@ topology:
     host4:
       group: hosts
 
-    # Data-center hosts (Alpine Linux): no mgmt interface, static eth1 in the VLAN subnet (NetBox VM host5-8, VRF PROD). The DNS servers
+    # Data-center servers (Alpine Linux): no mgmt interface, static eth1 in the VLAN subnet (NetBox VM server5-8, VRF PROD). The DNS servers
     # are the DNS forwarders of the firewalls (their lo addresses, FW1 first: the data center reaches FW2's address only through FW1).
     # The default route is the anycast gateway of the VLAN; the ping primes the MAC/ARP learning of the leaf.
-    host5:   # Leaf-1 ethernet-1/10, DC-APP-A (VLAN 10)
-      group: dc-hosts
+    server5:   # Leaf-1 ethernet-1/10, DC-APP-A (VLAN 10)
+      group: servers
       exec:
         - ip addr add 172.24.10.11/24 dev eth1
         - ip route add default via 172.24.10.1
         - sh -c "printf 'search devogs.xyz\\nnameserver 172.16.8.1\\nnameserver 172.16.8.2\\n' > /etc/resolv.conf"
         - ping -c 1 -W 2 172.24.10.1
-    host6:   # Leaf-1 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
-      group: dc-hosts
+    server6:   # Leaf-1 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
+      group: servers
       exec:
         - ip addr add 172.24.30.11/24 dev eth1
         - ip route add default via 172.24.30.1
         - sh -c "printf 'search devogs.xyz\\nnameserver 172.16.8.1\\nnameserver 172.16.8.2\\n' > /etc/resolv.conf"
         - ping -c 1 -W 2 172.24.30.1
-    host7:   # Leaf-2 ethernet-1/10, DC-APP-B (VLAN 20)
-      group: dc-hosts
+    server7:   # Leaf-2 ethernet-1/10, DC-APP-B (VLAN 20)
+      group: servers
       exec:
         - ip addr add 172.24.20.11/24 dev eth1
         - ip route add default via 172.24.20.1
         - sh -c "printf 'search devogs.xyz\\nnameserver 172.16.8.1\\nnameserver 172.16.8.2\\n' > /etc/resolv.conf"
         - ping -c 1 -W 2 172.24.20.1
-    host8:   # Leaf-2 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
-      group: dc-hosts
+    server8:   # Leaf-2 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
+      group: servers
       exec:
         - ip addr add 172.24.30.12/24 dev eth1
         - ip route add default via 172.24.30.1
@@ -275,8 +275,8 @@ topology:
     - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
     - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
 
-    # --- SR Linux: leaf access ports to the data-center hosts ---
-    - endpoints: ["Leaf-1:ethernet-1/10", "host5:eth1"]
-    - endpoints: ["Leaf-1:ethernet-1/11", "host6:eth1"]
-    - endpoints: ["Leaf-2:ethernet-1/10", "host7:eth1"]
-    - endpoints: ["Leaf-2:ethernet-1/11", "host8:eth1"]
+    # --- SR Linux: leaf access ports to the data-center servers ---
+    - endpoints: ["Leaf-1:ethernet-1/10", "server5:eth1"]
+    - endpoints: ["Leaf-1:ethernet-1/11", "server6:eth1"]
+    - endpoints: ["Leaf-2:ethernet-1/10", "server7:eth1"]
+    - endpoints: ["Leaf-2:ethernet-1/11", "server8:eth1"]
