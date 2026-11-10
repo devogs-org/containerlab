@@ -60,6 +60,14 @@ topology:
       memory: 64mb
       exec:
         - udhcpc -i eth1 -b -q
+    # Data-center hosts: same limits, but a static address (set per node, from NetBox) instead of DHCP.
+    dc-hosts:
+      kind: linux
+      image: alpine:latest
+      network-mode: none
+      cpu: 0.25
+      cpu-set: "6-11"
+      memory: 64mb
 
   nodes:
     # ---------------- VyOS firewalls (10.16.10.11-19) ----------------
@@ -168,6 +176,33 @@ topology:
     host4:
       group: hosts
 
+    # Data-center hosts (Alpine Linux): no mgmt interface, static eth1 in the VLAN subnet (NetBox VM host5-8, VRF PROD).
+    # The default route is the anycast gateway of the VLAN; the ping primes the MAC/ARP learning of the leaf.
+    host5:   # Leaf-1 ethernet-1/10, DC-APP-A (VLAN 10)
+      group: dc-hosts
+      exec:
+        - ip addr add 172.24.10.11/24 dev eth1
+        - ip route add default via 172.24.10.1
+        - ping -c 1 -W 2 172.24.10.1
+    host6:   # Leaf-1 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
+      group: dc-hosts
+      exec:
+        - ip addr add 172.24.30.11/24 dev eth1
+        - ip route add default via 172.24.30.1
+        - ping -c 1 -W 2 172.24.30.1
+    host7:   # Leaf-2 ethernet-1/10, DC-APP-B (VLAN 20)
+      group: dc-hosts
+      exec:
+        - ip addr add 172.24.20.11/24 dev eth1
+        - ip route add default via 172.24.20.1
+        - ping -c 1 -W 2 172.24.20.1
+    host8:   # Leaf-2 ethernet-1/11, DC-DB-STRETCH (VLAN 30)
+      group: dc-hosts
+      exec:
+        - ip addr add 172.24.30.12/24 dev eth1
+        - ip route add default via 172.24.30.1
+        - ping -c 1 -W 2 172.24.30.1
+
   links:
     # --- External WAN ---
     - endpoints: ["FW1:eth1", "br-wan:wan-fw1"]
@@ -231,3 +266,9 @@ topology:
     - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
     - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
     - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
+
+    # --- SR Linux: leaf access ports to the data-center hosts ---
+    - endpoints: ["Leaf-1:ethernet-1/10", "host5:eth1"]
+    - endpoints: ["Leaf-1:ethernet-1/11", "host6:eth1"]
+    - endpoints: ["Leaf-2:ethernet-1/10", "host7:eth1"]
+    - endpoints: ["Leaf-2:ethernet-1/11", "host8:eth1"]
