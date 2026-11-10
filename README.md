@@ -30,3 +30,13 @@ The firewalls send their syslog to the collector and keep nothing (twelve-factor
 is mounted as a journald drop-in: volatile journal (RAM), 32M maximum, 500 messages per 30 s and service. Without it the
 persistent journal grew to 3.9 GB in a DHCP storm (Kea logs every packet). The local syslog sink is removed by Ansible
 (`day1_campus`, tag `syslog`). Check: `docker exec clab-showroom-FW1 systemd-analyze cat-config systemd/journald.conf`.
+
+## Showroom: iperf3 servers
+`server9` (Leaf-1 `ethernet-1/12`, DC-APP-A) and `server10` (Leaf-2 `ethernet-1/12`, DC-APP-B) run `iperf3 -s` (5201/tcp) with a static eth1
+and no management interface. The image is `networkstatic/iperf3` plus `iproute2` and `ping` (the upstream image has no `ip`), built locally
+before the deploy (`image-pull-policy: never`):
+```
+docker build -t showroom/iperf3:latest showroom/images/iperf3
+```
+Check: `docker exec clab-showroom-server9 ss -ltn` (5201 listening). They are the pool of the HAProxy service of the firewalls
+(`day2_security`, tag `haproxy`).
