@@ -50,7 +50,7 @@ topology:
       cpu-set: "6-11"
       # Memory cap (host protection only): ~165-185 MiB used, so 768mb is ~4x headroom.
       memory: 768mb
-    hosts:
+    clients:
       kind: linux
       image: alpine:latest
       network-mode: none
@@ -169,15 +169,15 @@ topology:
       type: l2
       mgmt-ipv4: 10.16.10.40
 
-    # Dataplane testing hosts (Alpine Linux): no mgmt interface, eth1 via DHCP
-    host1:
-      group: hosts
-    host2:
-      group: hosts
-    host3:
-      group: hosts
-    host4:
-      group: hosts
+    # Dataplane testing clients (Alpine Linux): no mgmt interface, eth1 via DHCP
+    client1:
+      group: clients
+    client2:
+      group: clients
+    client3:
+      group: clients
+    client4:
+      group: clients
 
     # Data-center servers (Alpine Linux): no mgmt interface, static eth1 in the VLAN subnet (NetBox VM server5-8, VRF PROD). The DNS servers
     # are the DNS forwarders of the firewalls (their lo addresses, FW1 first: the data center reaches FW2's address only through FW1).
@@ -269,11 +269,11 @@ topology:
     - endpoints: ["dist2-1:Ethernet1/1", "access2-2:Ethernet0/1"]
     - endpoints: ["dist2-2:Ethernet1/1", "access2-2:Ethernet0/2"]
 
-    # --- Cisco: access to hosts ---
-    - endpoints: ["access1-1:Ethernet0/3", "host1:eth1"]
-    - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
-    - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
-    - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
+    # --- Cisco: access to the clients ---
+    - endpoints: ["access1-1:Ethernet0/3", "client1:eth1"]
+    - endpoints: ["access1-2:Ethernet0/3", "client2:eth1"]
+    - endpoints: ["access2-1:Ethernet0/3", "client3:eth1"]
+    - endpoints: ["access2-2:Ethernet0/3", "client4:eth1"]
 
     # --- SR Linux: leaf access ports to the data-center servers ---
     - endpoints: ["Leaf-1:ethernet-1/10", "server5:eth1"]

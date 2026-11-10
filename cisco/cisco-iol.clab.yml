@@ -62,20 +62,20 @@ topology:
       type: l2
       mgmt-ipv4: 10.16.4.34
 
-    # Dataplane Testing Hosts (Alpine Linux)
-    host1:
+    # Dataplane Testing Clients (Alpine Linux)
+    client1:
       kind: linux
       image: alpine:latest
       mgmt-ipv4: 10.16.4.41
-    host2:
+    client2:
       kind: linux
       image: alpine:latest
       mgmt-ipv4: 10.16.4.42
-    host3:
+    client3:
       kind: linux
       image: alpine:latest
       mgmt-ipv4: 10.16.4.43
-    host4:
+    client4:
       kind: linux
       image: alpine:latest
       mgmt-ipv4: 10.16.4.44
@@ -122,8 +122,8 @@ topology:
     - endpoints: ["dist2-2:Ethernet1/1", "access2-2:Ethernet0/2"]
 
     # Access to Hosts
-    - endpoints: ["access1-1:Ethernet0/3", "host1:eth1"]
-    - endpoints: ["access1-2:Ethernet0/3", "host2:eth1"]
-    - endpoints: ["access2-1:Ethernet0/3", "host3:eth1"]
-    - endpoints: ["access2-2:Ethernet0/3", "host4:eth1"]
+    - endpoints: ["access1-1:Ethernet0/3", "client1:eth1"]
+    - endpoints: ["access1-2:Ethernet0/3", "client2:eth1"]
+    - endpoints: ["access2-1:Ethernet0/3", "client3:eth1"]
+    - endpoints: ["access2-2:Ethernet0/3", "client4:eth1"]
 
