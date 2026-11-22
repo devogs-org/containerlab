@@ -10,6 +10,15 @@ mkdir -p showroom/flash/{core1,core2,dist1-1,dist1-2,dist2-1,dist2-2,access1-1,a
 containerlab deploy -t showroom/showroom.clab.yml --reconfigure
 ```
 
+## Showroom: Cisco IOL entrypoint
+The IOL images (vrnetlab c467f0d) start `iouyap` after a fixed `sleep 5` and size the IOL slots from the `eth*`
+interfaces present at that moment. When containerlab attaches the data links later than that, `iouyap` exits
+(`docker logs`: `iouyap: ioctl: No such device`), IOL runs with `-e 1` and the node is unreachable (SSH closed,
+ARP failed). `--cleanup` does not fix it. `showroom/iol-entrypoint.sh` is bind-mounted over `/entrypoint.sh` in the
+`cisco` group: it waits until the `CLAB_INTFS` data interfaces exist (timeout `IOL_INTF_WAIT_TIMEOUT`, 300 s by
+default; the container exits with an error after that). The file must stay executable. Check a node with
+`docker logs clab-showroom-core1 | grep 'Data interfaces ready'`.
+
 ## Showroom: CPU limits
 The containers of the showroom are capped so a broadcast or DHCP storm cannot take the whole host (the Cisco IOL L2 images
 reject `storm-control` and MQC `service-policy`, so the container is the only place to limit them). Host of 16 CPUs:

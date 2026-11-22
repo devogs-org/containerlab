@@ -44,6 +44,9 @@ topology:
         # Kept outside clab-showroom/ so --reconfigure does not wipe it. Containerlab requires the
         # folders to exist: mkdir -p showroom/flash/<node> (see README).
         - flash/__clabNodeName__:/iol/flash
+        # Patched vrnetlab entrypoint: waits for the CLAB_INTFS data links before starting iouyap/IOL. The stock one
+        # starts after a fixed "sleep 5", so on this topology iouyap dies (ioctl: No such device) and IOL boots with -e 1.
+        - iol-entrypoint.sh:/entrypoint.sh:ro
       # IOL is mostly single-threaded and idles at ~1% CPU. The cap keeps a storm from taking the host
       # (the L2 images cannot police or storm-control, so the container is the only limit).
       cpu: 0.5
