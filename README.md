@@ -22,6 +22,26 @@ export TARVOS_ADMIN_PASSWORD=...   # local admin (break-glass), TARVOS_SSH_PASSW
 ```
 Syslog (10.16.10.100), gNMI (57400) and LLDP come from the environment of the group. NTP is the host clock (container).
 
+## Showroom: Cisco IOL entrypoint
+The IOL images (vrnetlab c467f0d) start `iouyap` and IOL after a fixed `sleep 5`. Two races follow:
+- **Data links:** `iouyap` and the IOL slot count use the `eth*` present at that moment. A link attached later
+  makes `iouyap` exit (`docker logs`: `iouyap: ioctl: No such device`) and IOL run with `-e 1`.
+- **Boot config:** containerlab empties `boot_config.txt` (`/iol/config.txt`) at every deploy and writes it in its
+  post-deploy step. That step runs one node at a time, and on a redeploy that keeps `nvram_*` (destroy without
+  `--cleanup`) it also types the mgmt IP on each IOL console and waits for the prompt. IOS then boots with an empty
+  config: setup dialog or `Switch>`, no mgmt IP, SSH closed. Containerlab's own `wr` can then save that empty
+  config to nvram, so the node stays broken on later redeploys until `--cleanup`.
+
+`showroom/iol-entrypoint.sh` is bind-mounted over `/entrypoint.sh` in the `cisco` group (the file must stay
+executable). It waits for the `CLAB_INTFS` data interfaces (`IOL_INTF_WAIT_TIMEOUT`, 300 s, then exit 1) and for
+a non-empty `/iol/config.txt` (`IOL_CONFIG_WAIT_TIMEOUT`, 900 s, then boot anyway). Check a node with
+`docker logs clab-showroom-core1 | grep -E 'Data interfaces ready|Boot config ready'`.
+
+Redeploy times on this topology: `destroy --cleanup` then `deploy` takes ~25 s (first boot, no console step).
+A plain `destroy` then `deploy` works too, but takes ~6 min because containerlab boots and configures the IOL nodes
+one after the other. Use `--cleanup` unless the IOL nvram must be kept (snapshots in `showroom/flash/` are kept
+either way).
+
 ## Showroom: CPU limits
 The containers of the showroom are capped so a broadcast or DHCP storm cannot take the whole host (the Cisco IOL L2 images
 reject `storm-control` and MQC `service-policy`, so the container is the only place to limit them). Host of 16 CPUs:
