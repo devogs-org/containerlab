@@ -28,7 +28,7 @@ topology:
       memory: 2gb
     tarvos:
       kind: linux
-      image: matt13290/tarvos:v2.1.4
+      image: matt13290/tarvos:v2.1.5
       # Tarvos (FRR + Sysrepo/Netopeer2 + eBPF telemetry): no kind of its own, so the linux kind with the capabilities and sysctls
       # of its docker-compose.yml (https://github.com/devogs/tarvos). The links are attached after boot (eth1+), eth0 is the mgmt VRF.
       cap-add:
