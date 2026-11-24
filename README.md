@@ -64,11 +64,11 @@ persistent journal grew to 3.9 GB in a DHCP storm (Kea logs every packet). The l
 (`day1_campus`, tag `syslog`). Check: `docker exec clab-showroom-FW1 systemd-analyze cat-config systemd/journald.conf`.
 
 ## Showroom: iperf3 servers
-`server5` (Leaf-3 `eth10`, DC-APP-A) and `server6` (Leaf-3 `eth11`, DC-APP-B) run `iperf3 -s` (5201/tcp) with a static eth1
+`iperf-server1` (Leaf-3 `eth10`, DC-APP-A) and `iperf-server2` (Leaf-3 `eth11`, DC-APP-B) run `iperf3 -s` (5201/tcp) with a static eth1
 and no management interface. The image is `networkstatic/iperf3` plus `iproute2` and `ping` (the upstream image has no `ip`), built locally
 before the deploy (`image-pull-policy: never`):
 ```
 docker build -t showroom/iperf3:latest showroom/images/iperf3
 ```
-Check: `docker exec clab-showroom-server5 ss -ltn` (5201 listening). They are the pool of the HAProxy service of the firewalls
+Check: `docker exec clab-showroom-iperf-server1 ss -ltn` (5201 listening). They are the pool of the HAProxy service of the firewalls
 (`day2_security`, tag `haproxy`).
