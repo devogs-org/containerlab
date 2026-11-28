@@ -51,6 +51,9 @@ topology:
         # sshd/netopeer2 are not VRF-aware: accept connections coming from the mgmt VRF
         net.ipv4.tcp_l3mdev_accept: "1"
         net.ipv4.udp_l3mdev_accept: "1"
+        # No rate limit on the ICMP errors (default 1 per second): the MTR probes of the NetWatcher agents cross the same nodes, and the
+        # dropped time-exceeded replies show as packet loss on the hop (SHD-36)
+        net.ipv4.icmp_ratelimit: "0"
       env:
         # AAA: tac_plus-ng of showroom-identity (fixed IP on clab-mgmt). The shared key is TACACS_KEY of that repository's .env,
         # exported in the shell before `containerlab deploy`. admin / ADMIN_PASSWORD stays the local break-glass account.
